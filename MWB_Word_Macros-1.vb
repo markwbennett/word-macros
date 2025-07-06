@@ -1208,6 +1208,49 @@ ErrorHandler:
 End Sub
 
 ' =============================================================================
+' PASTE UTILITIES
+' =============================================================================
+
+' Paste plain text while cleaning nonbreaking spaces and multiple newlines
+' Usage: Assign to a keyboard shortcut or ribbon button for quick access
+Sub PastePlainTextClean()
+    On Error GoTo ErrorHandler
+    
+    ' Check if clipboard has content
+    If Not Application.ClipBoard.HasData Then
+        MsgBox "No content in clipboard to paste.", vbInformation, "Paste Clean Text"
+        Exit Sub
+    End If
+    
+    ' Get clipboard text
+    Dim clipText As String
+    clipText = Application.ClipBoard.GetText
+    
+    ' Convert nonbreaking spaces (Chr(160)) to regular spaces (Chr(32))
+    clipText = Replace(clipText, Chr(160), Chr(32))
+    
+    ' Convert multiple newlines to single newlines
+    ' First normalize line endings to vbLf
+    clipText = Replace(clipText, vbCrLf, vbLf)
+    clipText = Replace(clipText, vbCr, vbLf)
+    
+    ' Remove multiple consecutive newlines
+    Do While InStr(clipText, vbLf & vbLf) > 0
+        clipText = Replace(clipText, vbLf & vbLf, vbLf)
+    Loop
+    
+    ' Insert the cleaned text at current cursor position
+    Selection.TypeText clipText
+    
+    LogAction "Pasted plain text with cleaned spaces and newlines"
+    
+    Exit Sub
+    
+ErrorHandler:
+    DisplayError Err.Number, Err.Description
+End Sub
+
+' =============================================================================
 ' END OF MACRO COLLECTION
 ' =============================================================================
 
