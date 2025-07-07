@@ -1,7 +1,7 @@
 Attribute VB_Name = "PasteUtilities"
 ' =============================================================================
 ' PASTE UTILITIES MODULE
-' Version: 2.0
+' Version: 2.1
 ' Description: Paste-related macros and utilities
 ' =============================================================================
 

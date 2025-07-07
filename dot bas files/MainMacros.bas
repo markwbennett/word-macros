@@ -1,7 +1,7 @@
 Attribute VB_Name = "MainMacros"
 ' =============================================================================
 ' MAIN MACROS MODULE
-' Version: 2.0
+' Version: 2.1
 ' Description: Main coordination, initialization, and batch operations
 ' =============================================================================
 

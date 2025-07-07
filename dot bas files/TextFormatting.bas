@@ -1,7 +1,7 @@
 Attribute VB_Name = "TextFormatting"
 ' =============================================================================
 ' TEXT FORMATTING MODULE
-' Version: 2.0
+' Version: 2.1
 ' Description: Text formatting and legal paste utilities
 ' =============================================================================
 

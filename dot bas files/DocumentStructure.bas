@@ -1,7 +1,7 @@
 Attribute VB_Name = "DocumentStructure"
 ' =============================================================================
 ' DOCUMENT STRUCTURE MODULE
-' Version: 2.0
+' Version: 2.1
 ' Description: Table of contents, word count, and date insertion macros
 ' =============================================================================
 

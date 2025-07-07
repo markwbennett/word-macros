@@ -1,7 +1,7 @@
 Attribute VB_Name = "FootnoteManager"
 ' =============================================================================
 ' FOOTNOTE MANAGER MODULE
-' Version: 2.0
+' Version: 2.1
 ' Description: Footnote management and formatting macros
 ' =============================================================================
 

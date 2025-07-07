@@ -1,7 +1,7 @@
 Attribute VB_Name = "SpecialCharacters"
 ' =============================================================================
 ' SPECIAL CHARACTERS MODULE
-' Version: 2.0
+' Version: 2.1
 ' Description: Special character insertion and formatting macros
 ' =============================================================================
 

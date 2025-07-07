@@ -1,7 +1,7 @@
 Attribute VB_Name = "MacroUtilities"
 ' =============================================================================
 ' MACRO UTILITIES MODULE
-' Version: 2.0
+' Version: 2.1
 ' Description: Core utility functions and constants shared across all macro modules
 ' =============================================================================
 

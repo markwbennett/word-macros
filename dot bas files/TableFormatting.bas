@@ -1,7 +1,7 @@
 Attribute VB_Name = "TableFormatting"
 ' =============================================================================
 ' TABLE FORMATTING MODULE
-' Version: 2.0
+' Version: 2.1
 ' Description: Table and cross-reference formatting macros
 ' =============================================================================
 
