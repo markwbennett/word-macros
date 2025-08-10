@@ -1,0 +1,295 @@
+' =============================================================================
+' PASTE PLAIN TEXT CLEAN - STANDALONE VERSION
+' Version: 1.0
+' Date: December 2024
+' Description: Paste plain text while cleaning nonbreaking spaces and multiple newlines
+'
+' Features:
+' - Converts nonbreaking spaces to regular spaces
+' - Converts line feeds to paragraph marks
+' - Collapses multiple paragraph marks to single paragraph marks
+' - Collapses multiple spaces/tabs to single spaces
+' - Works in footnotes, endnotes, and main document
+' =============================================================================
+
+Option Explicit
+
+' Auto-assign keyboard shortcut when template loads
+Sub Auto_Open()
+    On Error Resume Next
+    ' Assign Cmd+Option+Shift+V to PastePlainTextClean
+    Application.CustomizationContext = NormalTemplate
+    KeyBindings.Add KeyCode:=BuildKeyCode(wdKeyV, wdKeyCommand + wdKeyOption + wdKeyShift), _
+                   KeyCategory:=wdKeyCategoryMacro, _
+                   Command:="PastePlainTextClean"
+    On Error GoTo 0
+End Sub
+
+' Paste plain text while cleaning nonbreaking spaces and multiple newlines
+' Usage: Assign to a keyboard shortcut or ribbon button for quick access
+Sub PastePlainTextClean()
+    On Error GoTo ErrorHandler
+    
+    ' Check if we're in a footnote or endnote
+    Dim isInFootnote As Boolean
+    isInFootnote = (Selection.Information(wdInFootnote) Or Selection.Information(wdInEndnote))
+    
+    ' Declare and assign start position of the pasted content
+    Dim rngFrom As Long, rngTo As Long
+    rngFrom = Selection.Start
+    
+    ' Paste as unformatted text using the same method as the working example
+    On Error Resume Next
+    Selection.PasteAndFormat (wdFormatSurroundingFormattingWithEmphasis)
+    
+    ' Check if paste was successful
+    If Err.Number <> 0 Then
+        On Error GoTo ErrorHandler
+        MsgBox "No text content in clipboard to paste.", vbInformation, "Paste Clean Text"
+        Exit Sub
+    End If
+    
+    On Error GoTo ErrorHandler
+    
+    ' Get the range of pasted content
+    rngTo = Selection.End
+    
+    ' Handle selection differently for footnotes vs main document
+    If isInFootnote Then
+        ' In footnotes, just extend the selection to cover pasted content
+        Selection.SetRange rngFrom, rngTo
+    Else
+        ' In main document, use the Range method
+        ActiveDocument.Range(rngFrom, rngTo).Select
+    End If
+    
+    ' Convert nonbreaking spaces (Chr(160)) to regular spaces (Chr(32))
+    With Selection.Find
+        .Text = ChrW(160)
+        .Replacement.Text = Chr(32)
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+        .Execute Replace:=wdReplaceAll
+    End With
+    
+    ' Convert multiple line feeds to single paragraph mark
+    Dim j As Integer
+    For j = 1 To 5
+        With Selection.Find
+            .Text = "^l^l"
+            .Replacement.Text = "^p"
+            .Forward = True
+            .Wrap = wdFindStop
+            .Format = False
+            .MatchCase = False
+            .MatchWholeWord = False
+            .MatchWildcards = False
+            .MatchSoundsLike = False
+            .MatchAllWordForms = False
+            .Execute Replace:=wdReplaceAll
+        End With
+    Next j
+    
+    ' Convert remaining single line feeds to paragraph marks
+    With Selection.Find
+        .Text = "^l"
+        .Replacement.Text = "^p"
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+        .Execute Replace:=wdReplaceAll
+    End With
+    
+    ' Replace "§ " (section symbol + regular space) with "§" + nonbreaking space
+    With Selection.Find
+        .Text = "§ "
+        .Replacement.Text = "§" & ChrW(160)
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+        .Execute Replace:=wdReplaceAll
+    End With
+    
+    ' Replace straight quotes with curly quotes (Word auto-converts)
+    With Selection.Find
+        .Text = """"
+        .Replacement.Text = """"
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+        .Execute Replace:=wdReplaceAll
+    End With
+    
+    With Selection.Find
+        .Text = "'"
+        .Replacement.Text = "'"
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+        .Execute Replace:=wdReplaceAll
+    End With
+    
+    ' First remove spaces/tabs around paragraph marks
+    With Selection.Find
+        .Text = "[ ^t^s]^p"
+        .Replacement.Text = "^p"
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+        .Execute Replace:=wdReplaceAll
+    End With
+    
+    With Selection.Find
+        .Text = "^p[ ^t^s]"
+        .Replacement.Text = "^p"
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+        .Execute Replace:=wdReplaceAll
+    End With
+    
+    ' Collapse multiple paragraph marks to single paragraph mark
+    Dim i As Integer
+    For i = 1 To 5
+        With Selection.Find
+            .Text = "^p^p"
+            .Replacement.Text = "^p"
+            .Forward = True
+            .Wrap = wdFindStop
+            .Format = False
+            .MatchCase = False
+            .MatchWholeWord = False
+            .MatchWildcards = False
+            .MatchSoundsLike = False
+            .MatchAllWordForms = False
+            .Execute Replace:=wdReplaceAll
+        End With
+    Next i
+    
+    ' Collapse all series of whitespace that do not include \n to single space
+    ' This handles: multiple spaces/tabs = single space
+    With Selection.Find
+        .Text = "[ ^t^s]{2,}"
+        .Replacement.Text = " "
+        .Forward = True
+        .Wrap = wdFindStop
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchWildcards = True
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+        .Execute Replace:=wdReplaceAll
+    End With
+    
+    ' Collapse selection to end
+    Selection.Collapse Direction:=wdCollapseEnd
+    
+    ' Reset Find settings to default values
+    With Selection.Find
+        .Text = ""
+        .Replacement.Text = ""
+        .Forward = True
+        .Wrap = wdFindContinue
+        .Format = False
+        .MatchCase = False
+        .MatchWholeWord = False
+        .MatchWildcards = False
+        .MatchSoundsLike = False
+        .MatchAllWordForms = False
+    End With
+    
+    Exit Sub
+    
+ErrorHandler:
+    MsgBox "Error " & Err.Number & ": " & Err.Description, vbExclamation, "Macro Error"
+End Sub
+
+
+Sub movetofootnote()
+'
+' movetofootnote Macro
+' move highlighted text to new footnote, or create new footnote if no text is higlighted
+'
+' Create new footnote if no text is hightlighted:
+    If Selection.Type = wdSelectionIP Then
+        With Selection
+            With .FootnoteOptions
+                .Location = wdBottomOfPage
+                .NumberingRule = wdRestartContinuous
+                .StartingNumber = 1
+                .NumberStyle = wdNoteNumberStyleArabic
+                .LayoutColumns = 0
+            End With
+        .Footnotes.Add Range:=Selection.Range, Reference:=""
+        End With
+        Selection.MoveLeft Unit:=wdCharacter, Count:=2
+        Selection.TypeText Text:=vbTab
+        Selection.MoveRight Unit:=wdCharacter, Count:=1, Extend:=wdExtend
+        Selection.Font.Superscript = wdToggle
+        Selection.MoveRight Unit:=wdCharacter, Count:=1
+        Selection.TypeText Text:="."
+        Selection.MoveRight Unit:=wdCharacter, Count:=1, Extend:=wdExtend
+        Selection.TypeText Text:=vbTab
+    End If
+  ' Create new footnote and move text, if text is highlighted
+    If Selection.Type = wdSelectionNormal Then
+        Selection.Cut
+        Selection.TypeBackspace
+         With Selection
+             With .FootnoteOptions
+                    .Location = wdBottomOfPage
+                    .NumberingRule = wdRestartContinuous
+                    .StartingNumber = 1
+                    .NumberStyle = wdNoteNumberStyleArabic
+                    .LayoutColumns = 0
+                End With
+                .Footnotes.Add Range:=Selection.Range, Reference:=""
+        End With
+        Selection.MoveLeft Unit:=wdCharacter, Count:=2
+        Selection.TypeText Text:=vbTab
+        Selection.MoveRight Unit:=wdCharacter, Count:=1, Extend:=wdExtend
+        Selection.Font.Superscript = wdToggle
+        Selection.MoveRight Unit:=wdCharacter, Count:=1
+        Selection.TypeText Text:="."
+        Selection.MoveRight Unit:=wdCharacter, Count:=1, Extend:=wdExtend
+        Selection.TypeText Text:=vbTab
+        Selection.PasteAndFormat (wdFormatSurroundingFormattingWithEmphasis)
+    End If
+End Sub
